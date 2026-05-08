@@ -26,7 +26,7 @@ git config --global user.name "zy1078"
 # ==================== 暂存并提交 ip.txt ====================
 git add ip.txt
 $commit_msg = "Update ip.txt on $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
-git commit -m $commit_msg
+git commit -m $commit_msg || exit 0
 
 # ==================== 强制推送到 GitHub ====================
 git push https://${github_token}@github.com/${github_username}/${repo_name}.git $branch --force
