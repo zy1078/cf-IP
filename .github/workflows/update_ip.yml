@@ -1,0 +1,59 @@
+name: Auto Update IP
+
+# 触发条件：每天早上 8 点自动运行（UTC时间，大概对应北京时间下午4点，你可以自己调）
+# 也可以手动触发
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 下载你的代码
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. 安装 Python 环境
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # 3. 安装依赖库 (根据你的项目需求，通常需要 requests)
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install requests
+
+      # 4. 核心步骤：运行你的 Python 脚本
+      # 注意：这里假设你的主程序叫 main.py，请根据实际情况修改
+      - name: Run Speed Test Script
+        env:
+          # 把第一步设置的“身份证”注入到环境变量里，让代码能读到
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+          CF_RECORD_NAME: ${{ secrets.CF_RECORD_NAME }}
+        run: |
+          # 运行你的脚本，生成 ip.txt
+          # 如果你的脚本名字不是 main.py，请在这里修改
+          python main.py
+
+      # 5. 保存结果：把生成的 ip.txt 上传回 GitHub
+      - name: Commit and Push IP file
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # 检查是否有文件变化
+          if [ -f "ip.txt" ]; then
+            git add ip.txt
+            git commit -m "Auto update ip.txt $(date +'%Y-%m-%d %H:%M:%S')"
+            git push
+          else
+            echo "Error: ip.txt not found!"
+            exit 1
+          fi
