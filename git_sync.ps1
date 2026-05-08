@@ -21,6 +21,8 @@ Set-Location $PSScriptRoot
 # ==================== 拉取远程最新更新 ====================
 git pull origin $branch
 
+git config --global user.email "1017sklhyhy@gmail.com"
+git config --global user.name "zy1078"
 # ==================== 暂存并提交 ip.txt ====================
 git add ip.txt
 $commit_msg = "Update ip.txt on $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
